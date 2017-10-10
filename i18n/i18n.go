@@ -1,4 +1,4 @@
-package i18n
+package i18n // import "ekyu.moe/soda/i18n"
 
 const (
 	EN_US = iota

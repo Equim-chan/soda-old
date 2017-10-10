@@ -1,4 +1,4 @@
-package main
+package main // import "ekyu.moe/soda"
 
 //go:generate goversioninfo -icon=icon.ico
 
