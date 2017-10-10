@@ -1,5 +1,5 @@
 # soda
-Soda is a tiny CLI application that helps establishing a one-to-one encrypted and authenticated channel for private communication, based on NaCl's public-key cryptosystem _Box_ (Curve25519 + XSalsa20 + Poly1305).
+Soda is a tiny CLI application that helps establishing a one-to-one encrypted and authenticated channel for private communication, driven by NaCl's public-key cryptosystem [Box](https://nacl.cr.yp.to/box.html) (Curve25519 + XSalsa20 + Poly1305).
 
 ## Install
 ```bash
