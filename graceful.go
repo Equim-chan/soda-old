@@ -1,10 +1,10 @@
 package main
 
 import (
+	"ekyu.moe/soda/i18n"
+
 	"fmt"
 	"os"
-
-	"ekyu.moe/soda/i18n"
 
 	surveyTerminal "gopkg.in/AlecAivazis/survey.v1/terminal"
 )

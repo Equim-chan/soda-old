@@ -1,13 +1,13 @@
 package main
 
 import (
+	"ekyu.moe/soda/i18n"
+
 	"crypto/subtle"
 	"encoding/binary"
 	"errors"
 	"hash/crc32"
 	"strings"
-
-	"ekyu.moe/soda/i18n"
 
 	"ekyu.moe/base91"
 )

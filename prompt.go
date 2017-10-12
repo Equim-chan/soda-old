@@ -1,9 +1,9 @@
 package main
 
 import (
-	"strings"
-
 	"ekyu.moe/soda/i18n"
+
+	"strings"
 
 	"ekyu.moe/base91"
 	survey "gopkg.in/AlecAivazis/survey.v1"

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"ekyu.moe/soda/i18n"
+
 	"bytes"
 	"compress/zlib"
 	"crypto/rand"
@@ -9,8 +11,6 @@ import (
 	"hash/crc32"
 	"io"
 	"io/ioutil"
-
-	"ekyu.moe/soda/i18n"
 
 	"ekyu.moe/base91"
 	"golang.org/x/crypto/nacl/box"

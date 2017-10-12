@@ -11,7 +11,7 @@
   branch = "master"
   name = "ekyu.moe/util"
   packages = ["cli"]
-  revision = "6e116cb8f23a2c1d3cf6e20f55f68fde47bf6b75"
+  revision = "7cb6ecd9e6ba04b0eda87d10c68d4c6949257080"
 
 [[projects]]
   name = "github.com/fatih/color"
