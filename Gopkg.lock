@@ -41,13 +41,13 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["curve25519","nacl/box","nacl/secretbox","poly1305","salsa20/salsa"]
-  revision = "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
+  revision = "2509b142fb2b797aa7587dad548f113b2c0f20ce"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "686000749eaec0b8855b8eef5336cf63899fe51d"
+  revision = "a1a1f1746d156bbc9954f29134b20ed4ce2752f1"
 
 [[projects]]
   name = "gopkg.in/AlecAivazis/survey.v1"
