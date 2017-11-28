@@ -5,8 +5,8 @@ Soda is a tiny CLI application that helps establishing a one-to-one encrypted an
 Recommended way ([dep](https://github.com/golang/dep) is required):
 ```bash
 $ git clone https://github.com/Equim-chan/soda.git $GOPATH/src/ekyu.moe/soda
-$ dep ensure
-$ go install
+$ make
+$ make install
 $ $GOPATH/bin/soda
 ```
 
