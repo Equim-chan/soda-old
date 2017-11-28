@@ -1,16 +1,16 @@
 package main
 
 import (
-	"ekyu.moe/soda/i18n"
-
 	"fmt"
 	"os"
 
-	surveyTerminal "gopkg.in/AlecAivazis/survey.v1/terminal"
+	surveyTerm "gopkg.in/AlecAivazis/survey.v1/terminal"
+
+	"ekyu.moe/soda/i18n"
 )
 
 func gracefulFatal(err error) {
-	if err == surveyTerminal.InterruptErr {
+	if err == surveyTerm.InterruptErr {
 		// 直接退
 		os.Exit(2)
 	}
@@ -22,7 +22,7 @@ func gracefulFatal(err error) {
 }
 
 func gracefulError(err error) {
-	if err == surveyTerminal.InterruptErr {
+	if err == surveyTerm.InterruptErr {
 		// 不算错误，不处理
 		fmt.Println()
 		return

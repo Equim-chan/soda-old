@@ -1,8 +1,6 @@
 package main
 
 import (
-	"ekyu.moe/soda/i18n"
-
 	"bytes"
 	"compress/zlib"
 	"crypto/rand"
@@ -14,6 +12,8 @@ import (
 
 	"ekyu.moe/base91"
 	"golang.org/x/crypto/nacl/box"
+
+	"ekyu.moe/soda/i18n"
 )
 
 // 该函数会对输入尝试进行压缩，如果体积有所减小，则返回压缩后的内容和 true。

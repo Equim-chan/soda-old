@@ -3,8 +3,6 @@ package main // import "ekyu.moe/soda"
 //go:generate goversioninfo -icon=icon.ico
 
 import (
-	"ekyu.moe/soda/i18n"
-
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
@@ -14,6 +12,8 @@ import (
 	"ekyu.moe/base91"
 	"ekyu.moe/util/cli"
 	"golang.org/x/crypto/nacl/box"
+
+	"ekyu.moe/soda/i18n"
 )
 
 const (

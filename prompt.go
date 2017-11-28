@@ -1,13 +1,13 @@
 package main
 
 import (
-	"ekyu.moe/soda/i18n"
-
 	"strings"
 
 	"ekyu.moe/base91"
 	survey "gopkg.in/AlecAivazis/survey.v1"
 	surveyCore "gopkg.in/AlecAivazis/survey.v1/core"
+
+	"ekyu.moe/soda/i18n"
 )
 
 func init() {

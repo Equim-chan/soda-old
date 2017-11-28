@@ -1,8 +1,6 @@
 package main
 
 import (
-	"ekyu.moe/soda/i18n"
-
 	"crypto/subtle"
 	"encoding/binary"
 	"errors"
@@ -10,6 +8,8 @@ import (
 	"strings"
 
 	"ekyu.moe/base91"
+
+	"ekyu.moe/soda/i18n"
 )
 
 func pubValidator(val interface{}) error {
