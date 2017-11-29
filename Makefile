@@ -15,27 +15,25 @@
 PKG := .
 
 #####################################################################
+# basic envs
 SHELL := /bin/bash
 MAKE := make --no-print-directory
 
+# conditions check
+HAVE_UPX := $(shell hash upx 2> /dev/null && echo 1)
+
+# build commands and flags
 GC := go build
 ifdef DEBUG
   GCFLAGS += -N -l
 else
   LDFLAGS += -s -w
 endif
-
 VERSION := $(shell git describe --dirty --always --tags 2> /dev/null || date +"%y%m%d")
-LDFLAGS += -X main.Version=$(VERSION)
+BUILD_DATE := $(shell date +"%y-%m-%d")
+LDFLAGS += -X main.Version=$(VERSION) -X main.BuildDate=$(BUILD_DATE)
 
-ifdef GOOS
-  ifeq ($(GOOS),windows)
-    GOEXE := .exe
-  endif
-else ifeq ($(OS),Windows_NT)
-  GOEXE := .exe
-endif
-
+# determine the name of the default target `BIN'
 DIRNAME := $(shell basename $(shell pwd))
 TITLE := $(DIRNAME)
 ifdef SUFFIX
@@ -49,16 +47,19 @@ else ifdef GOOS
     endif
   endif
 endif
+GOEXE := $(shell env GOOS=$(GOOS) go env GOEXE)
 BIN := $(TITLE)$(GOEXE)
 
+# prefix for target `install'
 PREFIX := $(GOPATH)/bin
-
-HAVE_UPX := $(shell hash upx 2> /dev/null && echo 1)
 
 define magic
   SUFFIX=$1 $(shell test "$(RELEASE)" && echo "pack")
 endef
 
+ifdef V
+  VERBOSE := 1
+endif
 ifndef VERBOSE
   AT := @
 endif
@@ -81,6 +82,7 @@ $(BIN): $(PREPARE) $(SRC)
 .PHONY: pack
 pack: $(TITLE)-$(VERSION).tar.xz
 
+# this target won't remove its dependancy
 $(TITLE)-$(VERSION).tar.xz: $(BIN)
 ifdef HAVE_UPX
 	@echo "  - UPX"
@@ -91,8 +93,9 @@ ifdef HAVE_UPX
   endif
 endif
 	@echo "  - TAR | XZ"
-	$(AT)tar cpf - $^ | xz -c9 - > $@
+	$(AT)tar -cf - --mode="a+x" $< | xz -c9 - > $@
 
+# cross-building
 .PHONY: all
 all: $(PLATFORMS)
 
@@ -140,4 +143,8 @@ bench: $(PREPARE)
 .PHONY: clean
 clean:
 	go clean
-	$(RM) $(BIN) $(DIRNAME).tar.xz $(foreach t,$(PLATFORMS),$(DIRNAME)-$(t)*) $(DIRNAME)-*.sha256
+	$(RM) \
+		$(BIN) \
+		$(DIRNAME).tar.xz \
+		$(foreach p,$(PLATFORMS),$(DIRNAME)-$(p)*) \
+		$(DIRNAME)-*.sha256
