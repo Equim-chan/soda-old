@@ -24,14 +24,24 @@ HAVE_UPX := $(shell hash upx 2> /dev/null && echo 1)
 
 # build commands and flags
 GC := go build
+ifeq ($(OS),Windows_NT)
+  GOPATH := $(shell cygpath -w $(GOPATH))
+endif
 ifdef DEBUG
   GCFLAGS += -N -l
-else
+  ifdef RACE
+    FLAGS += --race
+  endif
+else ifdef RELEASE
+  # in release mode, GOPATH should be wiped from the built binary
+  GCFLAGS += --trimpath $(GOPATH)
+  ASMFLAGS += --trimpath $(GOPATH)
   LDFLAGS += -s -w
 endif
 VERSION := $(shell git describe --dirty --always --tags 2> /dev/null || date +"%y%m%d")
+GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE := $(shell date +"%y-%m-%d")
-LDFLAGS += -X main.Version=$(VERSION) -X main.BuildDate=$(BUILD_DATE)
+LDFLAGS += -X main.Version=$(VERSION) -X main.GitHash=$(GIT_HASH) -X main.BuildDate=$(BUILD_DATE)
 
 # determine the name of the default target `BIN'
 DIRNAME := $(shell basename $(shell pwd))
@@ -77,7 +87,7 @@ $(BIN): $(PREPARE) $(SRC)
 	test "$(GOARM)" && echo -ne "\x1b[35mGOARM=$(GOARM) "; \
 	test "$(GOOS)" -o "$(GOARCH)" -o "$(GOARM)" && echo -ne "\n"; \
 	echo -e "\x1b[0m  - \x1b[1;36mGC\x1b[0m"
-	$(AT)$(GC) -o $@ --gcflags "$(GCFLAGS)" --ldflags "$(LDFLAGS)" $(PKG)
+	$(AT)$(GC) $(FLAGS) -o $@ --gcflags "$(GCFLAGS)" --asmflags "$(ASMFLAGS)" --ldflags "$(LDFLAGS)" $(PKG)
 
 .PHONY: pack
 pack: $(TITLE)-$(VERSION).tar.xz
@@ -93,7 +103,7 @@ ifdef HAVE_UPX
   endif
 endif
 	@echo "  - TAR | XZ"
-	$(AT)tar -cf - --mode="a+x" $< | xz -c9 - > $@
+	$(AT)tar -cf - --mode="a+x" $< | xz -T0 -c9 - > $@
 
 # cross-building
 .PHONY: all
@@ -117,7 +127,7 @@ release: all
 	@echo -e "\n\x1b[35m  - SHA256 > $(DIRNAME)-$(VERSION).sha256\x1b[0m"
 	$(AT)sha256sum *.tar.xz > $(DIRNAME)-$(VERSION).sha256
 
-vendor:
+vendor: Gopkg.lock Gopkg.toml
 ifdef VERBOSE
 	dep ensure -v
 else
