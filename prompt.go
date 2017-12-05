@@ -1,12 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"ekyu.moe/base91"
+	"github.com/atotto/clipboard"
 	survey "gopkg.in/AlecAivazis/survey.v1"
 	surveyCore "gopkg.in/AlecAivazis/survey.v1/core"
 
+	"ekyu.moe/soda/codec"
+	"ekyu.moe/soda/convey"
 	"ekyu.moe/soda/i18n"
 )
 
@@ -118,24 +122,82 @@ func promptEncrypted() ([]byte, error) {
 	return base91.DecodeString(encrypted)[4:], nil
 }
 
-func promptOutput(isEncrypt bool) (int, error) {
-	msg := i18n.PROMPT_OUTPUT_PLAIN
-	if isEncrypt {
-		msg = i18n.PROMPT_OUTPUT_ENCRYPTED
-	}
+func promptOutputWriter() (convey.WriteFunc, error) {
 	question := &survey.Select{
-		Message: msg,
-		Options: []string{i18n.PROMPT_OUTPUT_EDITOR, i18n.PROMPT_OUTPUT_TERMINAL},
-		Help:    i18n.PROMPT_OUTPUT_HELP,
+		Message: "Please select your output method",
+		Options: []string{"Terminal", "Editor", "Clipboard"},
+		// Options: []string{i18n.PROMPT_OUTPUT_EDITOR, i18n.PROMPT_OUTPUT_TERMINAL, "Clipboard"},
+		Help: "TODO", // i18n.PROMPT_OUTPUT_HELP,
 	}
 
-	printer := ""
-	if err := survey.AskOne(question, &printer, nil); err != nil {
-		return -1, err
+	writer := ""
+	if err := survey.AskOne(question, &writer, nil); err != nil {
+		return nil, err
 	}
 
-	if printer == i18n.PROMPT_OUTPUT_TERMINAL {
-		return OUTPUT_TERMINAL, nil
+	switch writer {
+	case "Terminal":
+		return convey.TerminalWrite, nil
+	case "Clipboard":
+		if clipboard.Unsupported {
+			fmt.Println("Sorry but clipboard is not supported on your platform, fallback to editor")
+			return convey.EditorWrite, nil
+		}
+		return convey.ClipboardWrite, nil
+	case "Editor":
+		fallthrough
+	default:
+		return convey.EditorWrite, nil
 	}
-	return OUTPUT_EDITOR, nil
+}
+
+func promptOutputCodec() (codec.EncodeFunc, error) {
+	question := &survey.Select{
+		Message: "Please select your output codec",
+		Options: []string{"ASCII", "Emoji", "EmojiTag"},
+		Help:    "TODO  (like >OwJh>}A) (like 👾🍧🙆🍬🙇🌱) (like :pizza::sushi::beer:)",
+	}
+
+	encode := ""
+	if err := survey.AskOne(question, &encode, nil); err != nil {
+		return nil, err
+	}
+
+	switch encode {
+	case "Emoji":
+		return codec.EmojiEncode, nil
+	case "EmojiTag":
+		return codec.EmojiTagEncode, nil
+	case "ASCII":
+		fallthrough
+	default:
+		return codec.Base91Encode, nil
+	}
+}
+
+func promptInputReader() (convey.ReadFunc, error) {
+	question := &survey.Select{
+		Message: "Please select your input method",
+		Options: []string{"Editor", "Clipboard"},
+		// Options: []string{i18n.PROMPT_OUTPUT_EDITOR, i18n.PROMPT_OUTPUT_TERMINAL, i18n.PROMPT_OUTPUT_CLIPBOARD},
+		Help: "TODO", // i18n.PROMPT_OUTPUT_HELP,
+	}
+
+	reader := ""
+	if err := survey.AskOne(question, &reader, nil); err != nil {
+		return nil, err
+	}
+
+	switch reader {
+	case "Clipboard":
+		if clipboard.Unsupported {
+			fmt.Println("Sorry but clipboard is not supported on your platform, fallback to editor")
+			return convey.EditorRead, nil
+		}
+		return convey.ClipboardRead, nil
+	case "Editor":
+		fallthrough
+	default:
+		return convey.EditorRead, nil
+	}
 }

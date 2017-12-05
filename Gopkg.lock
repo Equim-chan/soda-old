@@ -2,10 +2,16 @@
 
 
 [[projects]]
+  name = "ekyu.moe/base256"
+  packages = ["."]
+  revision = "e96a96e70b1a744f509b0ff0490b8ab02ad6f389"
+  version = "v0.1.0"
+
+[[projects]]
   name = "ekyu.moe/base91"
   packages = ["."]
-  revision = "105c2212f5ef9b3ad81e81b0cdfd2d81e324bfa5"
-  version = "v0.2.1"
+  revision = "d635dd43489445af57e74ba5a5193976df4690a2"
+  version = "v0.2.2"
 
 [[projects]]
   branch = "master"
@@ -14,10 +20,28 @@
   revision = "8feadcee67b193f55f8c21c2ee88ff78b8406494"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/atotto/clipboard"
+  packages = ["."]
+  revision = "bb272b845f1112e10117e3e45ce39f690c0001ad"
+
+[[projects]]
+  name = "github.com/awnumar/memguard"
+  packages = [".","memcall"]
+  revision = "b482b0c828e2eeecbfebb05ca965c8d571afaeff"
+  version = "v0.13.2"
+
+[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
   version = "v1.5.0"
+
+[[projects]]
+  name = "github.com/kyokomi/emoji"
+  packages = ["."]
+  revision = "7e06b236c489543f53868841f188a294e3383eab"
+  version = "v1.5"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -40,14 +64,14 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["curve25519","nacl/box","nacl/secretbox","poly1305","salsa20/salsa"]
-  revision = "365904b0f3154c6e11a9cf541c9803d1dca0445a"
+  packages = ["curve25519","nacl/box","nacl/secretbox","poly1305","salsa20/salsa","ssh/terminal"]
+  revision = "94eea52f7b742c7cbe0b03b22f0c4c8631ece122"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix"]
-  revision = "a204229cd828a74741ee7b5da9bf4794497f85ed"
+  packages = ["unix","windows"]
+  revision = "8b4580aae2a0dd0c231a45d3ccb8434ff533b840"
 
 [[projects]]
   name = "gopkg.in/AlecAivazis/survey.v1"
@@ -58,6 +82,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0c19db9efdc4bd77820dc89564ef9a9c9d5c737f574a3df1455bdd8a3083daca"
+  inputs-digest = "7ce62f096ce4c0938a583bafba52f5706529f59d42f55878a4f3f83a4249770c"
   solver-name = "gps-cdcl"
   solver-version = 1
