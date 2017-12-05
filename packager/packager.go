@@ -45,13 +45,16 @@ func DetachCrc32(content []byte) ([]byte, bool) {
 	return nil, false
 }
 
-// 该函数会对输入尝试进行压缩，如果体积有所减小，则返回压缩后的内容和 true。
-// 反之，返回原 Buffer 和 false。
-// This function is never thread safe.
-// TODO: assert orig immute, destroy
-func Pack(orig *memguard.LockedBuffer) (*memguard.LockedBuffer, bool) {
+// Pack tries to compress orig, the return value may be compress or not.
+// If ever an error is returned, then it must be a fatal one.
+func Pack(orig *memguard.LockedBuffer) (*memguard.LockedBuffer, error) {
+	// This is an assertion.
+	if orig.IsMutable() {
+		panic("packet must be immutable")
+	}
+
 	if err := globalBuffer.MakeMutable(); err != nil {
-		return orig, false
+		return nil, err
 	}
 	defer globalBuffer.MakeImmutable()
 	defer globalBuffer.Wipe()
@@ -61,54 +64,70 @@ func Pack(orig *memguard.LockedBuffer) (*memguard.LockedBuffer, bool) {
 	z, err := zlib.NewWriterLevel(buf, zlib.BestCompression)
 	// 遇到错误直接选择不压缩
 	if err != nil {
-		return orig, false
+		return orig, nil
 	}
 	defer z.Close()
 
 	if _, err := z.Write(orig.Buffer()); err != nil {
-		return orig, false
+		return orig, nil
 	}
 	if err := z.Close(); err != nil {
-		return orig, false
+		return orig, nil
 	}
 
-	if l := buf.Len(); l < orig.Size() {
-		ret, err := memguard.Trim(globalBuffer, 0, l)
-		if err != nil {
-			return orig, false
-		}
-
-		if err := ret.MakeImmutable(); err != nil {
-			return orig, false
-		}
-
-		return ret, true
+	// Compare the sizes
+	l := buf.Len()
+	if l >= orig.Size() {
+		return orig, nil
 	}
 
-	return orig, false
-}
-
-// 该函数会对输入尝试进行解压缩，如果是合法的 zlib 压缩，则返回解压后的内容和 nil
-// 反之，返回 nil 和 error。
-func Unpack(packet *memguard.LockedBuffer) (*memguard.LockedBuffer, error) {
-	// 尝试解压
-	r := bytes.NewReader(packet.Buffer())
-	z, err := zlib.NewReader(r)
-	// 遇到错误直接不解压
-	// 但是这样有隐藏的风险，也许只是偶然的错误，但内容确实是压缩过的
+	// these errors are all fatal
+	ret, err := memguard.Trim(globalBuffer, 0, l)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := ret.MakeImmutable(); err != nil {
+		ret.Destroy()
+		return nil, err
+	}
+
+	return ret, nil
+}
+
+// Unpack tries to decompress orig, the return value may be decompress or not.
+// If ever an error is returned, then it must be a fatal one.
+func Unpack(orig *memguard.LockedBuffer) (*memguard.LockedBuffer, error) {
+	// Assert
+	if orig.IsMutable() {
+		panic("packet must be immutable")
+	}
+
+	// Try decompress
+	r := bytes.NewReader(orig.Buffer())
+	z, err := zlib.NewReader(r)
+	// Once an error is met, return orig.
+	// However this is risky, as it is possible to be an occasional error
+	// with its content indeed compressed.
+	if err != nil {
+		return orig, nil
 	}
 	defer z.Close()
 
-	// 这没办法了
+	// I can't come up with a safer idea at the moment
 	decompressed, err := ioutil.ReadAll(z)
 	if err != nil {
-		return nil, err
+		return orig, nil
 	}
 	if err := z.Close(); err != nil {
+		return orig, nil
+	}
+
+	ret, err := memguard.NewImmutableFromBytes(decompressed)
+	if err != nil {
+		ret.Destroy()
 		return nil, err
 	}
 
-	return memguard.NewImmutableFromBytes(decompressed)
+	return ret, nil
 }

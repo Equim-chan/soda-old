@@ -145,167 +145,25 @@ func mainLoop() (bool, error) {
 
 	switch cmd {
 	case CMD_ENC:
-		{
-			// Prompt input method
-			informln("For the plain text:")
-			read, err := promptInputReader()
-			if err != nil {
-				return false, err
-			}
-
-			// Prompt output codec
-			informln("For the encrypted text:")
-			encode, err := promptOutputCodec()
-			if err != nil {
-				return false, err
-			}
-
-			// Prompt output method
-			write, err := promptOutputWriter()
-			if err != nil {
-				return false, err
-			}
-
-			// Read plain text
-			raw, err := read()
-			if err != nil {
-				return false, err
-			}
-
-			// Validate length
-			if len(raw) == 0 {
-				return false, errors.New("plain text cannot be empty")
-			}
-
-			plain, err := memguard.NewImmutableFromBytes(raw)
-			if err != nil {
-				return false, errors.New("crc32 checksum failed")
-			}
-
-			// Pack it
-			// It will try to compress the plain text
-			// and the packet will be destroyed after packing
-			packet, _ := packager.Pack(plain)
-
-			// Seal
-			// The packet will be destroyed after sealing
-			encrypted, err := session.Seal(packet)
-			if err != nil {
-				return false, err
-			}
-
-			// Attach crc32
-			payload := packager.AttachCrc32(encrypted)
-
-			// Encode the packet
-			payloadStr := encode(payload)
-
-			// Output the payload
-			write([]byte(payloadStr))
-
-			// if output == OUTPUT_TERMINAL {
-			// 	fmt.Println(i18n.ENCRYPTED_BELOW)
-			// 	colorRed.Println(strings.Repeat("+", 60))
-			// 	colorDim.Println(payload)
-			// 	colorRed.Println(strings.Repeat("+", 60))
-			// } else {
-			// 	toggleEditorWithText(payload)
-			// }
-		}
+		err = encrypt()
 
 	case CMD_DEC:
-		{
-			// Prompt input method
-			informln("For the encrypted text:")
-			read, err := promptInputReader()
-			if err != nil {
-				return false, err
-			}
-
-			// Prompt output method
-			informln("For the plain text:")
-			write, err := promptOutputWriter()
-			if err != nil {
-				return false, err
-			}
-
-			// Read payload
-			payloadStr, err := read()
-			if err != nil {
-				return false, err
-			}
-
-			// Decode payload
-			payload := codec.DetectCodecAndDecode(string(payloadStr))
-
-			// Validate length (4 crc32 + 24 nonce)
-			if len(payload) <= 28 {
-				return false, errors.New("wrong payload size")
-			}
-
-			// Check and detach crc32
-			encrypted, ok := packager.DetachCrc32(payload)
-			if !ok {
-
-			}
-
-			// Open it
-			packet, err := session.Open(encrypted)
-			if err != nil {
-				return false, err
-			}
-
-			// Unpack packet
-			plain, err := packager.Unpack(packet)
-			if err != nil {
-				return false, err
-			}
-
-			// Write
-			write(plain.Buffer())
-
-			// Destroy the plain text
-			plain.Destroy()
-		}
-
-	// if output == OUTPUT_TERMINAL {
-	// 	fmt.Println(i18n.PLAIN_BELOW)
-	// 	colorRed.Println(strings.Repeat("+", 60))
-	// 	colorDim.Println(forceLf(plain))
-	// 	colorRed.Println(strings.Repeat("+", 60))
-	// } else {
-	// 	toggleEditorWithText(forceCrlf(plain))
-	// }
+		err = decrypt()
 
 	case CMD_RAND:
-		{
-			// Prompt output method
-			write, err := promptOutputWriter()
-			if err != nil {
-				return false, err
-			}
-
-			r, err := uuidv4()
-			if err != nil {
-				return false, err
-			}
-
-			write([]byte(r))
-
-			// colorRed.Println(strings.Repeat("+", 60))
-			// colorDim.Println(r)
-			// colorRed.Println(strings.Repeat("+", 60))
-		}
+		err = uuidv4()
 
 	case CMD_CLS:
-		return false, cli.ClearScreen()
+		err = cli.ClearScreen()
 
 	case CMD_EXIT:
 		return true, nil
 	}
 
-	seq++
-	fmt.Println()
+	if err == nil {
+		seq++
+		fmt.Println()
+	}
 
-	return false, nil
+	return false, err
 }
