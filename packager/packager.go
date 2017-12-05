@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"hash/crc32"
 	"io/ioutil"
+	"log"
 
 	"github.com/awnumar/memguard"
 )
@@ -78,8 +79,10 @@ func Pack(orig *memguard.LockedBuffer) (*memguard.LockedBuffer, error) {
 	// Compare the sizes
 	l := buf.Len()
 	if l >= orig.Size() {
+		log.Println("no compress")
 		return orig, nil
 	}
+	log.Println("compress")
 
 	// these errors are all fatal
 	ret, err := memguard.Trim(globalBuffer, 0, l)
