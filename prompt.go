@@ -16,6 +16,7 @@ import (
 
 func init() {
 	surveyCore.SelectFocusIcon = ">"
+	surveyCore.HelpIcon = ""
 }
 
 func promptLocale() (i18n.Locale, error) {

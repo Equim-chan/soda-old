@@ -48,7 +48,7 @@ func DetachCrc32(content []byte) ([]byte, bool) {
 // 该函数会对输入尝试进行压缩，如果体积有所减小，则返回压缩后的内容和 true。
 // 反之，返回原 Buffer 和 false。
 // This function is never thread safe.
-// TODO: assert orig immute
+// TODO: assert orig immute, destroy
 func Pack(orig *memguard.LockedBuffer) (*memguard.LockedBuffer, bool) {
 	if err := globalBuffer.MakeMutable(); err != nil {
 		return orig, false
