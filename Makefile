@@ -78,7 +78,7 @@ endif
 SRC := $(shell find . -path ./vendor -prune -o -name '*.go')
 SRC += Makefile
 PLATFORMS := linux-64 linux-32 windows-64 windows-32 macos
-PREPARE := vendor
+PREPARE := vendor resource.syso
 
 $(BIN): $(PREPARE) $(SRC)
 	@test "$(GOOS)" -o "$(GOARCH)" -o "$(GOARM)" && echo -ne "  "; \
@@ -128,11 +128,10 @@ release: all
 	$(AT)sha256sum *.tar.xz > $(DIRNAME)-$(VERSION).sha256
 
 vendor: Gopkg.lock Gopkg.toml
-ifdef VERBOSE
 	dep ensure -v
-else
-	dep ensure
-endif
+
+resource.syso: versioninfo.json icon.ico
+	go generate ./...
 
 .PHONY: install
 install: $(BIN)
