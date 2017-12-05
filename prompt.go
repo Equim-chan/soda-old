@@ -14,6 +14,14 @@ import (
 	"ekyu.moe/soda/i18n"
 )
 
+const (
+	CMD_ENC = iota
+	CMD_DEC
+	CMD_RAND
+	CMD_CLS
+	CMD_EXIT
+)
+
 func init() {
 	surveyCore.SelectFocusIcon = ">"
 	surveyCore.HelpIcon = ""
@@ -21,7 +29,7 @@ func init() {
 
 func promptLocale() (i18n.Locale, error) {
 	question := &survey.Select{
-		Message: "",
+		Message: fmt.Sprintf("soda %s at %s build %s", Version, GitHash, BuildDate),
 		Options: []string{"English", "日本語", "中文 (繁體)", "中文 (简体)"},
 	}
 

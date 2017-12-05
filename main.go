@@ -18,17 +18,13 @@ import (
 	"ekyu.moe/soda/packager"
 )
 
-const (
-	CMD_ENC = iota
-	CMD_DEC
-	CMD_RAND
-	CMD_CLS
-	CMD_EXIT
-)
-
 var (
 	session core.Session
 	seq     uint64 = 1
+
+	Version   = "(dev)"
+	BuildDate = "(unknown)"
+	GitHash   = "(unknwon)"
 )
 
 func main() {
@@ -37,32 +33,35 @@ func main() {
 	// Make sure we are in a tty
 	if !terminal.IsTerminal(int(os.Stdout.Fd())) || !terminal.IsTerminal(int(os.Stdin.Fd())) {
 		fmt.Fprintln(os.Stderr, "soda: soda only works in a tty.")
-		memguard.SafeExit(0)
+		memguard.SafeExit(1)
 	}
 
 	// Prompt locale
 	l, err := promptLocale()
 	if err != nil {
-		gracefulFatal(err)
+		fatal(err)
 	}
 	i18n.SetLocale(l)
+
+	informln("\nYour key pair is to be generated.")
+
+	// Prompt output codec
+	informln("For your own public key:")
+	encode, err := promptOutputCodec()
+	if err != nil {
+		fatal(err)
+	}
 
 	// Prompt output method
 	write, err := promptOutputWriter()
 	if err != nil {
-		gracefulFatal(err)
-	}
-
-	// Prompt output codec
-	encode, err := promptOutputCodec()
-	if err != nil {
-		gracefulFatal(err)
+		fatal(err)
 	}
 
 	// Generate session (key pair)
 	session, err = core.NewSession()
 	if err != nil {
-		gracefulFatal(err)
+		fatal(err)
 	}
 
 	// Append crc32 to the head
@@ -73,22 +72,22 @@ func main() {
 
 	// Output public key
 	if err := write([]byte(myPubStr)); err != nil {
-		gracefulFatal(err)
+		fatal(err)
 	}
 
 	for {
 		// Prompt input method
+		informln("\nFor your partner's public key:")
 		read, err := promptInputReader()
 		if err != nil {
 			// this one is fatal
-			gracefulFatal(err)
-			continue
+			fatal(err)
 		}
 
 		// Read partner's public key
 		hisPubStr, err := read()
 		if err != nil {
-			gracefulError(err)
+			perror(err)
 			continue
 		}
 
@@ -97,21 +96,21 @@ func main() {
 
 		// Validate length
 		if len(packet) != 36 {
-			gracefulError(errors.New("wrong public key size"))
+			perror(errors.New("wrong public key size"))
 			continue
 		}
 
 		// Check crc32
 		hisPub, ok := packager.DetachCrc32(packet)
 		if !ok {
-			gracefulError(errors.New("crc32 checksum failed"))
+			perror(errors.New("crc32 checksum failed"))
 			continue
 		}
 
 		// Compute shared secret
 		hisPubArray := (*[32]byte)(unsafe.Pointer(&hisPub[0]))
 		if err := session.Compute(hisPubArray); err != nil {
-			gracefulError(err)
+			perror(err)
 			continue
 		}
 
@@ -119,12 +118,12 @@ func main() {
 	}
 
 	// Session begins
-	colorGreenBold.Printf("=============== %s ===============\n", i18n.SESSION_BEGIN)
+	informf("\n\x1b[1m================= %s =================\x1b[0m\n", i18n.SESSION_BEGIN)
 
 	for {
 		quit, err := mainLoop()
 		if err != nil {
-			gracefulError(err)
+			perror(err)
 		}
 		if quit {
 			break
@@ -136,7 +135,7 @@ func main() {
 
 func mainLoop() (bool, error) {
 	// Print seq number
-	colorMagentaBold.Printf("[#%d]\n", seq)
+	printSeq()
 
 	// Prompt command
 	cmd, err := promptCmd()
@@ -148,12 +147,14 @@ func mainLoop() (bool, error) {
 	case CMD_ENC:
 		{
 			// Prompt input method
+			informln("For the plain text:")
 			read, err := promptInputReader()
 			if err != nil {
 				return false, err
 			}
 
 			// Prompt output codec
+			informln("For the encrypted text:")
 			encode, err := promptOutputCodec()
 			if err != nil {
 				return false, err
@@ -215,12 +216,14 @@ func mainLoop() (bool, error) {
 	case CMD_DEC:
 		{
 			// Prompt input method
+			informln("For the encrypted text:")
 			read, err := promptInputReader()
 			if err != nil {
 				return false, err
 			}
 
 			// Prompt output method
+			informln("For the plain text:")
 			write, err := promptOutputWriter()
 			if err != nil {
 				return false, err

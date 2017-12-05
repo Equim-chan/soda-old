@@ -23,10 +23,6 @@
   version = "^0.13.2"
 
 [[constraint]]
-  name = "github.com/fatih/color"
-  version = "^1.5.0"
-
-[[constraint]]
   name = "golang.org/x/crypto"
   branch = "master"
 

@@ -1,6 +1,7 @@
 package convey
 
 import (
+	"os"
 	"strings"
 
 	"github.com/mattn/go-colorable"
@@ -9,8 +10,8 @@ import (
 var (
 	stdout = colorable.NewColorableStdout()
 
-	warningBanner = []byte("\x1b[0;31m" + strings.Repeat("+", 60) + "\x1b[0m\n")
-	dimBegin      = []byte("\x1b[0;90m")
+	warningBanner = []byte("\x1b[31m" + strings.Repeat("+", 60) + "\x1b[0m\n")
+	dimBegin      = []byte("\x1b[90m")
 	dimEnd        = []byte("\x1b[0m\n")
 	newLine       = []byte("\n")
 )
@@ -24,7 +25,7 @@ func TerminalWrite(text []byte) error {
 		return err
 	}
 
-	if _, err := stdout.Write(text); err != nil {
+	if _, err := os.Stdout.Write(text); err != nil {
 		return err
 	}
 
@@ -32,10 +33,6 @@ func TerminalWrite(text []byte) error {
 		return err
 	}
 	if _, err := stdout.Write(warningBanner); err != nil {
-		return err
-	}
-
-	if _, err := stdout.Write(newLine); err != nil {
 		return err
 	}
 

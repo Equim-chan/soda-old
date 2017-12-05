@@ -32,12 +32,6 @@
   version = "v0.13.2"
 
 [[projects]]
-  name = "github.com/fatih/color"
-  packages = ["."]
-  revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
-  version = "v1.5.0"
-
-[[projects]]
   name = "github.com/kyokomi/emoji"
   packages = ["."]
   revision = "7e06b236c489543f53868841f188a294e3383eab"
@@ -64,7 +58,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["curve25519","nacl/box","nacl/secretbox","poly1305","salsa20/salsa","ssh/terminal"]
+  packages = ["curve25519","nacl/secretbox","poly1305","salsa20/salsa","ssh/terminal"]
   revision = "94eea52f7b742c7cbe0b03b22f0c4c8631ece122"
 
 [[projects]]
@@ -82,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7ce62f096ce4c0938a583bafba52f5706529f59d42f55878a4f3f83a4249770c"
+  inputs-digest = "09630072514b007ba165696580492124374b9b01475deaf04a6522223bf0144c"
   solver-name = "gps-cdcl"
   solver-version = 1
