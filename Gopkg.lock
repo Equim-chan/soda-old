@@ -16,8 +16,8 @@
 [[projects]]
   branch = "master"
   name = "ekyu.moe/util"
-  packages = ["cli"]
-  revision = "8feadcee67b193f55f8c21c2ee88ff78b8406494"
+  packages = ["bytesutil","cli"]
+  revision = "05374e785b1dcea7b6d4e763a1fe95f0622fcbca"
 
 [[projects]]
   branch = "master"
@@ -58,7 +58,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["curve25519","nacl/secretbox","poly1305","salsa20/salsa","ssh/terminal"]
+  packages = ["curve25519","nacl/secretbox","poly1305","salsa20/salsa","sha3","ssh/terminal"]
   revision = "94eea52f7b742c7cbe0b03b22f0c4c8631ece122"
 
 [[projects]]
@@ -76,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "09630072514b007ba165696580492124374b9b01475deaf04a6522223bf0144c"
+  inputs-digest = "b6b6bedea97a30d405dd7fda6ebdbd601c22e8cb96d724f0c914e2cf84132fdc"
   solver-name = "gps-cdcl"
   solver-version = 1

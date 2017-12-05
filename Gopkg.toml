@@ -7,6 +7,10 @@
   version = "^0.1.0"
 
 [[constraint]]
+  name = "ekyu.moe/util"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/kyokomi/emoji"
   version = "^1.5"
 
