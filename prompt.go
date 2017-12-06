@@ -29,7 +29,7 @@ func init() {
 
 func promptLocale() (i18n.Locale, error) {
 	question := &survey.Select{
-		Message: fmt.Sprintf("soda %s at %s build %s", Version, GitHash, BuildDate),
+		Message: fmt.Sprintf("soda %s (%s) build %s", Version, GitHash, BuildDate),
 		Options: []string{"English", "日本語", "中文 (繁體)", "中文 (简体)"},
 	}
 

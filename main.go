@@ -1,6 +1,4 @@
-package main // import "ekyu.moe/soda"
-
-//go:generate goversioninfo -icon=icon.ico
+package main
 
 import (
 	"errors"
@@ -19,12 +17,8 @@ import (
 )
 
 var (
-	session core.Session
-	seq     uint64 = 1
-
-	Version   = "(dev)"
-	BuildDate = "(unknown)"
-	GitHash   = "(unknwon)"
+	session *core.Session
+	id      uint64 = 1
 )
 
 func main() {
@@ -134,8 +128,8 @@ func main() {
 }
 
 func mainLoop() (bool, error) {
-	// Print seq number
-	printSeq()
+	// Print the ID (how many times mainLoop has been called without error)
+	printId()
 
 	// Prompt command
 	cmd, err := promptCmd()
@@ -161,7 +155,7 @@ func mainLoop() (bool, error) {
 	}
 
 	if err == nil {
-		seq++
+		id++
 		fmt.Println()
 	}
 

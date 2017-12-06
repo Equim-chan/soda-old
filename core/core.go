@@ -19,14 +19,9 @@ var (
 	zeros [16]byte
 )
 
-type Session interface {
-	PublicKey() *[32]byte
-	Compute(*[32]byte) error
-	Seal(*memguard.LockedBuffer) ([]byte, error)
-	Open([]byte) (*memguard.LockedBuffer, error)
-}
-
-type session struct {
+// Session holds the key pair, the shared secret, shared nonce seed and seq
+// number. Sensitive data is locked using memguard.
+type Session struct {
 	pub *[32]byte
 	pri *memguard.LockedBuffer
 
@@ -40,7 +35,7 @@ type session struct {
 
 // NewSession create a session and generates a key pair with their memory
 // locked.
-func NewSession() (Session, error) {
+func NewSession() (*Session, error) {
 	// Init private key
 	pri, err := memguard.NewImmutableRandom(32)
 	if err != nil {
@@ -53,15 +48,19 @@ func NewSession() (Session, error) {
 	// Calculate public key
 	curve25519.ScalarBaseMult(pub, priArray)
 
-	return &session{
+	return &Session{
 		pub: pub,
 		pri: pri,
 		seq: 0,
 	}, nil
 }
 
-func (s *session) PublicKey() *[32]byte {
+func (s *Session) PublicKey() *[32]byte {
 	return s.pub
+}
+
+func (s *Session) Seq() uint64 {
+	return s.seq
 }
 
 // Compute computes the shared secret and shared nonce seed.
@@ -92,7 +91,7 @@ func (s *session) PublicKey() *[32]byte {
 // Alice's nonce: 05 14 be f3 7e ef 43 db a5 24 ... 31 34 aa 7e 91 d3 0c 6e 40
 // Bob's seq    :                                      00 00 00 36 53 c0 1d 55
 // Bob's nonce  : 50 09 7e a0 48 ef 43 db a5 24 ... 31 34 aa 7e a7 80 cc 73 15
-func (s *session) Compute(pub *[32]byte) error {
+func (s *Session) Compute(pub *[32]byte) error {
 	if s.seq != 0 {
 		return errors.New("compute: already have shared secret")
 	}
@@ -187,7 +186,7 @@ func computeNounce(nonceSeed *[24]byte, seq uint64, isAlice bool) *[24]byte {
 // 01xxxxxx xxxxxxxx                                                       // max 16,384
 // 001xxxxx xxxxxxxx xxxxxxxx xxxxxxxx                                     // max 536,870,912
 // 0001xxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx // max 1 << 60
-func (s *session) generateSeqHeader() []byte {
+func (s *Session) generateSeqHeader() []byte {
 	switch {
 	case s.seq <= 1<<7:
 		head := make([]byte, 1)
@@ -271,7 +270,7 @@ func parseSeqHeader(e []byte) (uint64, int8) {
 
 // Seal encrypts the plain text. On success, the plain text will be
 // destroyed and return the nonce+encrypted
-func (s *session) Seal(plain *memguard.LockedBuffer) ([]byte, error) {
+func (s *Session) Seal(plain *memguard.LockedBuffer) ([]byte, error) {
 	if s.seq == 0 {
 		return nil, errors.New("seal: no shared key")
 	}
@@ -294,7 +293,7 @@ func (s *session) Seal(plain *memguard.LockedBuffer) ([]byte, error) {
 	return payload, nil
 }
 
-func (s *session) Open(encrypted []byte) (*memguard.LockedBuffer, error) {
+func (s *Session) Open(encrypted []byte) (*memguard.LockedBuffer, error) {
 	if s.seq == 0 {
 		return nil, errors.New("open: no shared key")
 	}

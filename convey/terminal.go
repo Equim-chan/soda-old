@@ -8,8 +8,7 @@ import (
 )
 
 var (
-	stdout = colorable.NewColorableStdout()
-
+	stdout        = colorable.NewColorableStdout()
 	warningBanner = []byte("\x1b[31m" + strings.Repeat("+", 60) + "\x1b[0m\n")
 	dimBegin      = []byte("\x1b[90m")
 	dimEnd        = []byte("\x1b[0m\n")

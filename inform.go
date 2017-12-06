@@ -28,8 +28,8 @@ func informln(a ...interface{}) {
 	fmt.Fprint(stdout, "\x1b[0m")
 }
 
-func printSeq() {
-	fmt.Fprintf(stdout, "\x1b[1;35m[#%d]\x1b[0m\n", seq)
+func printId() {
+	fmt.Fprintf(stdout, "\x1b[1;35m[#%d]\x1b[0m\n", id)
 }
 
 func fatal(err error) {
