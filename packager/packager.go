@@ -3,7 +3,6 @@ package packager // import "ekyu.moe/soda/packager"
 import (
 	"bytes"
 	"compress/zlib"
-	"crypto/subtle"
 	"encoding/binary"
 	"hash/crc32"
 	"io/ioutil"
@@ -39,7 +38,7 @@ func DetachCrc32(content []byte) ([]byte, bool) {
 	actual := crc32.Checksum(content[4:], crc32.IEEETable)
 	expected := binary.BigEndian.Uint32(content[:4])
 
-	if subtle.ConstantTimeEq(int32(actual), int32(expected)) == 1 {
+	if actual == expected {
 		return content[4:], true
 	}
 
