@@ -2,7 +2,7 @@
 package core // import "ekyu.moe/soda/core"
 
 import (
-	"crypto/subtle"
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"unsafe"
@@ -101,7 +101,7 @@ func (s *session) Compute(pub *[32]byte) error {
 	// nonce seed depends on the difference. It would be a serious
 	// BIG FAIL if two public keys are the same, even though the
 	// ScalarMult doesn't care.
-	if subtle.ConstantTimeCompare(pub[:], s.pub[:]) == 1 {
+	if bytes.Compare(pub[:], s.pub[:]) == 0 {
 		return errors.New("compute: two public keys are the same")
 	}
 
