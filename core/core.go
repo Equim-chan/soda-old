@@ -66,31 +66,31 @@ func (s *Session) Seq() uint64 {
 // Compute computes the shared secret and shared nonce seed.
 // On success, the private key of the session will be destroyed.
 //
-// The way how the shared nonce seed is computed:
+// How the shared nonce seed is computed on both sides:
 // In big endian, compare Alice's and Bob's public keys, if
-// Alice's public key is bigger, then she is in "plus mode".
-// In the case that Alice's public key is bigger, then
+// Alice's public key is greater, then she is in "plus mode".
+// In the case that Alice's public key is greater, then
 //     nonceSeed := SHAKE128(AlicePub + BobPub)[:24]
 //     seq := uint64(1)
 //     // little endian
-//     nonce := nonceSeed[:8] xor seq + nonceSeed[8:]
+//     nonce := nonceSeed[:8] XOR seq + nonceSeed[8:]
 //     seq++
 //     ...
 // else
 //     nonceSeed := SHAKE128(BobPub + AlicePub)[:24]
 //     seq := uint64(1)
 //     // big endian
-//     nonce := nonceSeed[:16] + nonceSeed[16:] xor seq
+//     nonce := nonceSeed[:16] + nonceSeed[16:] XOR seq
 //     seq++
 //     ...
 //
 // example when Alice and Bob both have a seq number of 233,333,333,333 (decimal):
-//                0           4           8            16          20
-// nonce seed   : 50 09 7e a0 48 ef 43 db a5 24 ... 31 34 aa 7e 91 d3 0c 6e 40
-// Alice's seq  : 55 1d c0 53 36 00 00 00
-// Alice's nonce: 05 14 be f3 7e ef 43 db a5 24 ... 31 34 aa 7e 91 d3 0c 6e 40
-// Bob's seq    :                                      00 00 00 36 53 c0 1d 55
-// Bob's nonce  : 50 09 7e a0 48 ef 43 db a5 24 ... 31 34 aa 7e a7 80 cc 73 15
+//                    0           4           8            16          20
+//     nonce seed   : 50 09 7e a0 48 ef 43 db a5 24 ... 31 34 aa 7e 91 d3 0c 6e 40
+//     Alice's seq  : 55 1d c0 53 36 00 00 00
+//     Alice's nonce: 05 14 be f3 7e ef 43 db a5 24 ... 31 34 aa 7e 91 d3 0c 6e 40
+//     Bob's seq    :                                      00 00 00 36 53 c0 1d 55
+//     Bob's nonce  : 50 09 7e a0 48 ef 43 db a5 24 ... 31 34 aa 7e a7 80 cc 73 15
 func (s *Session) Compute(pub *[32]byte) error {
 	if s.seq != 0 {
 		return errors.New("compute: already have shared secret")
@@ -180,26 +180,29 @@ func computeNounce(nonceSeed *[24]byte, seq uint64, isAlice bool) *[24]byte {
 }
 
 // The header's format is a bit like UTF-8.
+//
 // The followings are all in big endian.
-// H      L
-// 1xxxxxxx                                                                // max 128
-// 01xxxxxx xxxxxxxx                                                       // max 16,384
-// 001xxxxx xxxxxxxx xxxxxxxx xxxxxxxx                                     // max 536,870,912
-// 0001xxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx // max 1 << 60
+//     L      H
+//     xxxxxxx1                                                                // [1, 127]
+//     xxxxxx10 xxxxxxxx                                                       // [128, 16383]
+//     xxxxx100 xxxxxxxx xxxxxxxx xxxxxxxx                                     // [16384, 1 << 29 - 1]
+//     xxxx1000 xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx // [1 << 29, 1 << 60]
+//
+// TODO(Equim): Use LEB128 instead. The current one is full of bugs.
 func (s *Session) generateSeqHeader() []byte {
 	switch {
-	case s.seq <= 1<<7:
+	case s.seq <= 1<<7-1:
 		head := make([]byte, 1)
 		head[0] = uint8(s.seq&0x7f) | 0x80
 		return head
 
-	case s.seq <= 1<<14:
+	case s.seq <= 1<<14-1:
 		head := make([]byte, 2)
 		head[1] = uint8(s.seq & 0xff)
 		head[0] = uint8((s.seq>>8)&0x3f) | 0x40
 		return head
 
-	case s.seq <= 1<<29:
+	case s.seq <= 1<<29-1:
 		head := make([]byte, 4)
 		head[3] = uint8(s.seq & 0xff)
 		head[2] = uint8((s.seq >> 8) & 0xff)
@@ -207,7 +210,7 @@ func (s *Session) generateSeqHeader() []byte {
 		head[0] = uint8((s.seq>>24)&0x1f) | 0x20
 		return head
 
-	case s.seq <= 1<<60:
+	case s.seq <= 1<<60-1:
 		head := make([]byte, 8)
 		head[7] = uint8(s.seq & 0xff)
 		head[6] = uint8((s.seq >> 8) & 0xff)
