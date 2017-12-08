@@ -25,7 +25,8 @@ func main() {
 	defer memguard.DestroyAll()
 
 	// Make sure we are in a tty
-	if !terminal.IsTerminal(int(os.Stdout.Fd())) || !terminal.IsTerminal(int(os.Stdin.Fd())) {
+	if !terminal.IsTerminal(int(os.Stdout.Fd())) ||
+		!terminal.IsTerminal(int(os.Stdin.Fd())) {
 		fmt.Fprintln(os.Stderr, "soda: soda only works in a tty.")
 		memguard.SafeExit(1)
 	}

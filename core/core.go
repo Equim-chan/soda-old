@@ -63,13 +63,12 @@ func (s *Session) Seq() uint64 {
 	return s.seq
 }
 
-// Compute computes the shared secret and shared nonce seed.
-// On success, the private key of the session will be destroyed.
+// Compute computes the shared secret and shared nonce seed. On success, the
+// private key of the session will be destroyed.
 //
-// How the shared nonce seed is computed on both sides:
-// In big endian, compare Alice's and Bob's public keys, if
-// Alice's public key is greater, then she is in "plus mode".
-// In the case that Alice's public key is greater, then
+// This is how the shared nonce seed is computed on both sides: In big endian,
+// compare Alice's and Bob's public keys. In the case that Alice's public key is
+// greater, then
 //     nonceSeed := SHAKE128(AlicePub + BobPub)[:24]
 //     seq := uint64(1)
 //     // little endian
@@ -84,7 +83,8 @@ func (s *Session) Seq() uint64 {
 //     seq++
 //     ...
 //
-// example when Alice and Bob both have a seq number of 233,333,333,333 (decimal):
+// An example when Alice and Bob both have a seq number of 233,333,333,333
+// (decimal):
 //                    0           4           8            16          20
 //     nonce seed   : 50 09 7e a0 48 ef 43 db a5 24 ... 31 34 aa 7e 91 d3 0c 6e 40
 //     Alice's seq  : 55 1d c0 53 36 00 00 00
@@ -96,10 +96,10 @@ func (s *Session) Compute(pub *[32]byte) error {
 		return errors.New("compute: already have shared secret")
 	}
 
-	// We can't let them the same because the calculation of shared
-	// nonce seed depends on the difference. It would be a serious
-	// BIG FAIL if two public keys are the same, even though the
-	// ScalarMult doesn't care.
+	// We can't let them the same because the calculation of shared nonce seed
+	// depends on the difference. It would be a serious BIG FAIL if two public
+	// keys are the same, even though the ScalarMult doesn't really care about
+	// it.
 	if bytes.Compare(pub[:], s.pub[:]) == 0 {
 		return errors.New("compute: two public keys are the same")
 	}
@@ -229,10 +229,9 @@ func (s *Session) generateSeqHeader() []byte {
 	return nil
 }
 
-// Parse the seq header from an encrypted text. It returns the
-// seq number and the length of it in the encrypted text.
-// If it doesn't contain any valid info (e.g. e is 0 bytes long),
-// 0 and -1 are returned.
+// Parse the seq header from an encrypted text. It returns the seq number and
+// the length of it in the encrypted text. If it doesn't contain any valid info
+// (e.g. e is 0 bytes long), 0 and -1 are returned.
 func parseSeqHeader(e []byte) (uint64, int8) {
 	// log.Printf("e head 4: %b %b %b %b\n", e[0], e[1], e[2], e[3])
 
@@ -271,8 +270,8 @@ func parseSeqHeader(e []byte) (uint64, int8) {
 	return 0, -1
 }
 
-// Seal encrypts the plain text. On success, the plain text will be
-// destroyed and return the nonce+encrypted
+// Seal encrypts the plain text.
+// On success, the plain text will be destroyed and return the header+ciphertext.
 func (s *Session) Seal(plain *memguard.LockedBuffer) ([]byte, error) {
 	if s.seq == 0 {
 		return nil, errors.New("seal: no shared key")
