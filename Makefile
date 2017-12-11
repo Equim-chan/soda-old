@@ -24,9 +24,8 @@ HAVE_UPX := $(shell hash upx 2> /dev/null && echo 1)
 
 # build commands and flags
 GC := go build
-ifeq ($(OS),Windows_NT)
-  GOPATH := $(shell cygpath -w $(GOPATH))
-endif
+# just in case we get a cygwin path on windows
+GOPATH := $(shell go env GOPATH)
 ifdef DEBUG
   GCFLAGS += -N -l
   ifdef RACE
@@ -89,6 +88,13 @@ $(BIN): $(PREPARE) $(SRC)
 	echo -e "\x1b[0m  - \x1b[1;36mGC\x1b[0m"
 	$(AT)$(GC) $(FLAGS) -o $@ --gcflags "$(GCFLAGS)" --asmflags "$(ASMFLAGS)" --ldflags "$(LDFLAGS)" $(PKG)
 
+vendor: Gopkg.lock Gopkg.toml
+	dep ensure -v
+
+resource.syso: versioninfo.json icon.ico
+	goversioninfo --icon icon.ico
+
+
 .PHONY: pack
 pack: $(TITLE)-$(VERSION).tar.xz
 
@@ -126,12 +132,6 @@ release: RELEASE=1
 release: all
 	@echo -e "\n\x1b[35m  - SHA256 > $(DIRNAME)-$(VERSION).sha256\x1b[0m"
 	$(AT)sha256sum *.tar.xz > $(DIRNAME)-$(VERSION).sha256
-
-vendor: Gopkg.lock Gopkg.toml
-	dep ensure -v
-
-resource.syso: versioninfo.json icon.ico
-	go generate ./...
 
 .PHONY: install
 install: $(BIN)
