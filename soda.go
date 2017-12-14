@@ -7,6 +7,6 @@ package main // import "ekyu.moe/soda"
 
 var (
 	Version   = "(dev)"
+	GitHash   = "unknwon-dirty"
 	BuildDate = "(unknown)"
-	GitHash   = ""
 )

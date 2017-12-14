@@ -24,8 +24,19 @@ HAVE_UPX := $(shell hash upx 2> /dev/null && echo 1)
 
 # build commands and flags
 GC := go build
+
+ifeq ($(GOOS),linux)
+  ifeq ($(shell env GOOS= go env GOOS),linux)
+    FLAGS += --buildmode pie
+  else
+    # static link
+    CGO_ENABLED := 0
+  endif
+endif
+
 # just in case we get a cygwin path on windows
 GOPATH := $(shell go env GOPATH)
+
 ifdef DEBUG
   GCFLAGS += -N -l
   ifdef RACE
@@ -37,6 +48,7 @@ else ifdef RELEASE
   ASMFLAGS += --trimpath $(GOPATH)
   LDFLAGS += -s -w
 endif
+
 VERSION := $(shell git describe --dirty --always --tags 2> /dev/null || date +"%y%m%d")
 GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE := $(shell date +"%y-%m-%d")
@@ -86,7 +98,7 @@ $(BIN): $(PREPARE) $(SRC)
 	test "$(GOARM)" && echo -ne "\x1b[35mGOARM=$(GOARM) "; \
 	test "$(GOOS)" -o "$(GOARCH)" -o "$(GOARM)" && echo -ne "\n"; \
 	echo -e "\x1b[0m  - \x1b[1;36mGC\x1b[0m"
-	$(AT)$(GC) $(FLAGS) -o $@ --gcflags "$(GCFLAGS)" --asmflags "$(ASMFLAGS)" --ldflags "$(LDFLAGS)" $(PKG)
+	$(AT)$(GC) -o $@ $(FLAGS) --gcflags "$(GCFLAGS)" --asmflags "$(ASMFLAGS)" --ldflags "$(LDFLAGS)" $(PKG)
 
 vendor: Gopkg.lock Gopkg.toml
 	dep ensure -v
