@@ -22,19 +22,30 @@ var (
 )
 
 func main() {
-	defer memguard.DestroyAll()
+	code := realMain()
+	memguard.DestroyAll()
 
+	if code == 1 {
+		hintf("    Press enter to exit safely.\n")
+		fmt.Scanln()
+	}
+
+	os.Exit(code)
+}
+
+func realMain() int {
 	// Make sure we are in a tty
 	if !terminal.IsTerminal(int(os.Stdout.Fd())) ||
 		!terminal.IsTerminal(int(os.Stdin.Fd())) {
 		fmt.Fprintln(os.Stderr, "soda: soda only works in a tty.")
-		memguard.SafeExit(1)
+		return 2
 	}
 
 	// Prompt locale
 	l, err := promptLocale()
 	if err != nil {
-		fatal(err)
+		perror(err)
+		return 1
 	}
 	i18n.SetLocale(l)
 
@@ -44,19 +55,22 @@ func main() {
 	informln("For your own public key:")
 	encode, err := promptOutputCodec()
 	if err != nil {
-		fatal(err)
+		perror(err)
+		return 1
 	}
 
 	// Prompt output method
 	write, err := promptOutputWriter()
 	if err != nil {
-		fatal(err)
+		perror(err)
+		return 1
 	}
 
 	// Generate session (key pair)
 	session, err = core.NewSession()
 	if err != nil {
-		fatal(err)
+		perror(err)
+		return 1
 	}
 
 	// Append crc32 to the head
@@ -67,7 +81,8 @@ func main() {
 
 	// Output public key
 	if err := write([]byte(myPubStr)); err != nil {
-		fatal(err)
+		perror(err)
+		return 1
 	}
 
 	for {
@@ -76,7 +91,8 @@ func main() {
 		read, err := promptInputReader()
 		if err != nil {
 			// this one is fatal
-			fatal(err)
+			perror(err)
+			return 1
 		}
 
 		// Read partner's public key
@@ -125,12 +141,12 @@ func main() {
 		}
 	}
 
-	memguard.SafeExit(0)
+	return 0
 }
 
 func mainLoop() (bool, error) {
 	// Print the ID (how many times mainLoop has been called without error)
-	printId()
+	printID()
 
 	// Prompt command
 	cmd, err := promptCmd()
