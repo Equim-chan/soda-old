@@ -4,20 +4,26 @@
 [[projects]]
   name = "ekyu.moe/base256"
   packages = ["."]
-  revision = "e96a96e70b1a744f509b0ff0490b8ab02ad6f389"
-  version = "v0.1.0"
+  revision = "424e8ce8941619c316274628f7cf3c274b0c5713"
+  version = "0.1.1"
 
 [[projects]]
   name = "ekyu.moe/base91"
   packages = ["."]
-  revision = "d635dd43489445af57e74ba5a5193976df4690a2"
-  version = "v0.2.2"
+  revision = "7e4bd9d3be0d847fb35b99a17a114e55d1bbbf5e"
+  version = "v0.2.3"
+
+[[projects]]
+  name = "ekyu.moe/leb128"
+  packages = ["."]
+  revision = "34c607808d8acf511a748f59c86f897555fd2f19"
+  version = "0.1.2"
 
 [[projects]]
   branch = "master"
   name = "ekyu.moe/util"
-  packages = ["bytesutil","cli"]
-  revision = "05374e785b1dcea7b6d4e763a1fe95f0622fcbca"
+  packages = ["bytesutil","cli","cli/internal","sugar"]
+  revision = "b439704ee495af8620097b673250d0bb95eabc45"
 
 [[projects]]
   branch = "master"
@@ -65,7 +71,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "8b4580aae2a0dd0c231a45d3ccb8434ff533b840"
+  revision = "d5840adf789d732bc8b00f37b26ca956a7cc8e79"
 
 [[projects]]
   name = "gopkg.in/AlecAivazis/survey.v1"
@@ -76,6 +82,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b6b6bedea97a30d405dd7fda6ebdbd601c22e8cb96d724f0c914e2cf84132fdc"
+  inputs-digest = "d3902fb03652c44f30d8c30e5546ae366241fc780ba9cf79a856c2ff4d8d9cfb"
   solver-name = "gps-cdcl"
   solver-version = 1

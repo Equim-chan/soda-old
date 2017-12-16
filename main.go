@@ -149,7 +149,7 @@ func mainLoop() (bool, error) {
 		err = uuidv4()
 
 	case CMD_CLS:
-		err = cli.ClearScreen()
+		err = cli.ClearTerminal()
 
 	case CMD_EXIT:
 		return true, nil
